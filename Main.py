@@ -8,6 +8,7 @@ from os import getcwd, path, makedirs
 import sys
 import matplotlib.pyplot as plt
 import pathlib
+from MathUtils import MathUtils
 
 
 class LSTM:
@@ -178,9 +179,9 @@ class LSTM:
         if sampling:
             adjustx = 0
             adjusty = 0
-            if np.random.randint(0, 10) <= 5 and remaining_len >= 4:
+            '''if np.random.randint(0, 10) <= 5 and remaining_len >= 4:
                 adjustx = np.random.normal(0, 0.001)
-                adjusty = np.random.normal(0, 0.001)
+                adjusty = np.random.normal(0, 0.001)'''
             g_y = NNMath.sigmoid(np.dot(self.wy, hp) + self.by)
             g_y[0] += adjustx
             g_y[1] += adjusty
@@ -222,7 +223,7 @@ class LSTM:
         val_loss = abs(val_loss / a)
         return val_loss
 
-    def sample(self, inputs, last, sequence_len):
+    def     sample(self, inputs, last, sequence_len):
         hp = np.zeros(self.num_hidden_units)
         sprev = np.zeros(self.num_hidden_units)
         g_y = [0, 0]
@@ -246,6 +247,15 @@ class LSTM:
             a += 1
             rez.append(g_y)
 
+        angle = MathUtils.getAngle( rez[len(rez)-1],  last, inputs)
+
+        distReal = MathUtils.distance(inputs, last)
+        distSampled = MathUtils.distance(inputs, rez[len(rez)-1])
+
+        print(angle)
+        #rez = MathUtils.rotateLines(rez, angle)
+        #rez = MathUtils.strecthLines(rez, ( distReal / distSampled))
+        asd = 5;
         return rez
 
     def calculate_sequence(self, distance):
@@ -338,7 +348,7 @@ class LSTM:
                 first_point = data_in[0]
 
                 first_last = np.hstack((np.array(first_point)[0:2], np.array(last_point)[0:2]))
-                #nnloss, seq = self.Length_pred.train(np.array([distance]), len(data_in))
+                #nnloss, seq = self.Length_pred.train(np.array(F[distance]), len(data_in))
                 loss_nn += 0
                 hprev = np.zeros(self.num_hidden_units)  # reset LSTM memory
                 sprev = np.zeros(self.num_hidden_units)
@@ -396,11 +406,12 @@ class LSTM:
         distance = self.calculate_distance(input, output)
         seqLen = int(round(self.calculate_sequence(distance)))  # int(round(self.Length_pred.think(np.array([distance]))[0]))
         print('distance %f, seq_length: %d' % (distance,  seqLen))
-        samp = self.sample(input, output, seqLen)
+        samp = self.sample(input, output, 150)
         plt.axis([0, 1, 0, 1])
 
         plt.plot(np.array(samp)[:, 0], np.array(samp)[:, 1])
         plt.scatter(output[0], output[1])
+        plt.scatter(samp[len(samp)-1][0],samp[len(samp)-1][1])
         for s in samp:
             file.write("%f %f \n" % (s[0], s[1]))
         plt.show()
@@ -411,23 +422,30 @@ class LSTM:
     def calculate_distance(starting_point, end_point):
         return np.sqrt(np.power(starting_point[0]-end_point[0], 2) + np.power(starting_point[1]-end_point[1], 2))
 
-a = LSTM(5, 100, 2, 'lol2')
 
+a = LSTM(5, 100, 2, 'lol2')
+sx = 0
+sy = 0
+
+ex = 0.44
+ey = 0.82
 if __name__ == '__main__':
 
-    if len(sys.argv) <= 3:
+    if len(sys.argv) <= -1:
         a.train()
         exit(0)
 
     sys.stderr.write(str(sys.argv))
     print('hi')
-    a.max_seq = 290
+    a.max_seq = 240
     a.min_seq = 3
     a.import_weights(a.main_dir)
-    starting_point = np.array([float(sys.argv[1]), float(sys.argv[2])])#    starting_point = np.array([float(sys.argv[1]), float(sys.argv[2])])#
+    starting_point = np.array([float(sx), float(sy)])#    starting_point = np.array([float(sys.argv[1]), float(sys.argv[2])])#
 
-    end_point = np.array([float(sys.argv[3]), float(sys.argv[4])]) #np.array([0.131, 0.45]) #
+    end_point = np.array([float(ex), float(ey)]) #np.array([0.131, 0.45]) #
     a.print_to_file(starting_point, end_point)
+
+    asdasd = 245235
     #print(a.sample(starting_point, end_point, a.calculate_distance(starting_point, end_point)))
 
 
