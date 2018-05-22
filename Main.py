@@ -423,7 +423,7 @@ class LSTM:
         distance = self.calculate_distance(input, output)
         seqLen = int(round(self.calculate_sequence(distance)))  # int(round(self.Length_pred.think(np.array([distance]))[0]))
         print('distance %f, seq_length: %d' % (distance,  seqLen))
-        samp = self.sample(input, output, 150)
+        samp = self.sample(input, output, seqLen)
         plt.axis([0, 1, 0, 1])
 
         plt.plot(np.array(samp)[:, 0], np.array(samp)[:, 1])
@@ -443,10 +443,10 @@ class LSTM:
 
 a = LSTM(5, 100, 2, 'lol2')
 sx = 0.1
-sy = 0.185
+sy = 0.4
 
 ex = 0.18
-ey = 0.88
+ey = 0.2
 
 if __name__ == '__main__':
 
