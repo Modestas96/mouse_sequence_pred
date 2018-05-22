@@ -247,7 +247,9 @@ class LSTM:
             a += 1
             rez.append(g_y)
 
-        inputs = rez[0]
+        dx = rez[0] - inputs
+        rez -= dx
+
         angle = MathUtils.getAngle( rez[len(rez)-1],  last, inputs)
         rez = MathUtils.rotateLines( rez, angle)
 
@@ -271,7 +273,6 @@ class LSTM:
                 else:
                     l = midl
         rez = MathUtils.strecthLines(rez, r)
-        inputs = x[0]
         return rez
 
     def calculate_sequence(self, distance):
@@ -442,10 +443,10 @@ class LSTM:
 
 a = LSTM(5, 100, 2, 'lol2')
 sx = 0.1
-sy = 0.9
+sy = 0.185
 
-ex = 0.28
-ey = 0.18
+ex = 0.18
+ey = 0.88
 
 if __name__ == '__main__':
 
