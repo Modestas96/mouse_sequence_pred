@@ -247,15 +247,30 @@ class LSTM:
             a += 1
             rez.append(g_y)
 
+
         angle = MathUtils.getAngle( rez[len(rez)-1],  last, inputs)
+        rez = MathUtils.rotateLines( rez, angle)
 
         distReal = MathUtils.distance(inputs, last)
         distSampled = MathUtils.distance(inputs, rez[len(rez)-1])
 
-        print(angle)
-        #rez = MathUtils.rotateLines(rez, angle)
-        #rez = MathUtils.strecthLines(rez, ( distReal / distSampled))
-        asd = 5;
+        sampledOrig = np.copy(rez)
+        l,r,mid = 0,100,0
+        if 2 == 2:
+            while (r - l) > 0.000000000001:
+                midl = (l*2 + r) / 3
+                midr = ((l + 2*r)) / 3
+
+                dummy1 = MathUtils.strecthLines(sampledOrig, midl)
+                dummy2 = MathUtils.strecthLines(sampledOrig, midr)
+
+                d1 = MathUtils.distance(dummy1[len(dummy1) - 1], last)
+                d2 = MathUtils.distance(dummy2[len(dummy2) - 1], last)
+                if(d1 <= d2):
+                    r = midr
+                else:
+                    l = midl
+        rez = MathUtils.strecthLines(rez, r)
         return rez
 
     def calculate_sequence(self, distance):
@@ -424,11 +439,11 @@ class LSTM:
 
 
 a = LSTM(5, 100, 2, 'lol2')
-sx = 0
-sy = 0
+sx = 0.9
+sy = 0.6
 
-ex = 0.44
-ey = 0.82
+ex = 0.17
+ey = 0.13
 if __name__ == '__main__':
 
     if len(sys.argv) <= -1:
@@ -447,5 +462,3 @@ if __name__ == '__main__':
 
     asdasd = 245235
     #print(a.sample(starting_point, end_point, a.calculate_distance(starting_point, end_point)))
-
-
