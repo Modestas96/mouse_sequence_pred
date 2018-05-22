@@ -228,7 +228,7 @@ class LSTM:
         sprev = np.zeros(self.num_hidden_units)
         g_y = [0, 0]
         eps = 0.01
-        x = inputs
+        x = np.copy(inputs)
         t = 0
         rez = []
         a = 0
@@ -247,7 +247,7 @@ class LSTM:
             a += 1
             rez.append(g_y)
 
-
+        inputs = rez[0]
         angle = MathUtils.getAngle( rez[len(rez)-1],  last, inputs)
         rez = MathUtils.rotateLines( rez, angle)
 
@@ -271,6 +271,7 @@ class LSTM:
                 else:
                     l = midl
         rez = MathUtils.strecthLines(rez, r)
+        inputs = x[0]
         return rez
 
     def calculate_sequence(self, distance):
@@ -427,6 +428,7 @@ class LSTM:
         plt.plot(np.array(samp)[:, 0], np.array(samp)[:, 1])
         plt.scatter(output[0], output[1])
         plt.scatter(samp[len(samp)-1][0],samp[len(samp)-1][1])
+        plt.scatter(input[0], input[1])
         for s in samp:
             file.write("%f %f \n" % (s[0], s[1]))
         plt.show()
@@ -439,11 +441,12 @@ class LSTM:
 
 
 a = LSTM(5, 100, 2, 'lol2')
-sx = 0.9
-sy = 0.6
+sx = 0.1
+sy = 0.9
 
-ex = 0.17
-ey = 0.13
+ex = 0.28
+ey = 0.18
+
 if __name__ == '__main__':
 
     if len(sys.argv) <= -1:
