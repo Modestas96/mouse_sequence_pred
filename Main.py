@@ -11,6 +11,7 @@ import pathlib
 from MathUtils import MathUtils
 
 
+
 class LSTM:
     def __init__(self, input_size, num_hidden_units, output_size, folder, import_data = False):
         self.num_hidden_units = num_hidden_units
@@ -223,7 +224,7 @@ class LSTM:
         val_loss = abs(val_loss / a)
         return val_loss
 
-    def     sample(self, inputs, last, sequence_len):
+    def sample(self, inputs, last, sequence_len):
         hp = np.zeros(self.num_hidden_units)
         sprev = np.zeros(self.num_hidden_units)
         g_y = [0, 0]
@@ -231,9 +232,10 @@ class LSTM:
         x = np.copy(inputs)
         t = 0
         rez = []
+        rez.append(inputs)
         a = 0
         while True:
-            if sequence_len - a == 0:
+            if sequence_len/1 - a <= 0:
                 break
             if abs(g_y[0] - last[0]) < eps and abs(g_y[1] - last[1]) < eps:
                 break
@@ -246,33 +248,32 @@ class LSTM:
             t += 1
             a += 1
             rez.append(g_y)
+        if 5 == 5:
+            inputs = rez[0]
+            angle = MathUtils.getAngle( rez[len(rez)-1],  last, inputs)
+            rez = MathUtils.rotateLines( rez, angle)
 
-        dx = rez[0] - inputs
-        rez -= dx
+            distReal = MathUtils.distance(inputs, last)
+            distSampled = MathUtils.distance(inputs, rez[len(rez)-1])
 
-        angle = MathUtils.getAngle( rez[len(rez)-1],  last, inputs)
-        rez = MathUtils.rotateLines( rez, angle)
+            sampledOrig = np.copy(rez)
+            l,r,mid = 0,100,0
+            if 2 == 2:
+                while (r - l) > 0.000000000001:
+                    midl = (l*2 + r) / 3
+                    midr = ((l + 2*r)) / 3
 
-        distReal = MathUtils.distance(inputs, last)
-        distSampled = MathUtils.distance(inputs, rez[len(rez)-1])
+                    dummy1 = MathUtils.strecthLines(sampledOrig, midl)
+                    dummy2 = MathUtils.strecthLines(sampledOrig, midr)
 
-        sampledOrig = np.copy(rez)
-        l,r,mid = 0,100,0
-        if 2 == 2:
-            while (r - l) > 0.000000000001:
-                midl = (l*2 + r) / 3
-                midr = ((l + 2*r)) / 3
-
-                dummy1 = MathUtils.strecthLines(sampledOrig, midl)
-                dummy2 = MathUtils.strecthLines(sampledOrig, midr)
-
-                d1 = MathUtils.distance(dummy1[len(dummy1) - 1], last)
-                d2 = MathUtils.distance(dummy2[len(dummy2) - 1], last)
-                if(d1 <= d2):
-                    r = midr
-                else:
-                    l = midl
-        rez = MathUtils.strecthLines(rez, r)
+                    d1 = MathUtils.distance(dummy1[len(dummy1) - 1], last)
+                    d2 = MathUtils.distance(dummy2[len(dummy2) - 1], last)
+                    if(d1 <= d2):
+                        r = midr
+                    else:
+                        l = midl
+            rez = MathUtils.strecthLines(rez, r)
+            inputs = x[0]
         return rez
 
     def calculate_sequence(self, distance):
@@ -358,6 +359,7 @@ class LSTM:
             loss_nn = 0
             if c == 3:
                 c = 0
+
             for data_in in my_data:
                 if len(data_in) <= 2:
                     continue
@@ -423,7 +425,7 @@ class LSTM:
         distance = self.calculate_distance(input, output)
         seqLen = int(round(self.calculate_sequence(distance)))  # int(round(self.Length_pred.think(np.array([distance]))[0]))
         print('distance %f, seq_length: %d' % (distance,  seqLen))
-        samp = self.sample(input, output, seqLen)
+        samp = self.sample(input, output, 150)
         plt.axis([0, 1, 0, 1])
 
         plt.plot(np.array(samp)[:, 0], np.array(samp)[:, 1])
@@ -434,7 +436,12 @@ class LSTM:
             file.write("%f %f \n" % (s[0], s[1]))
         plt.show()
         file.close()
-
+    def test_stuff(self, input, output):
+        distance = self.calculate_distance(input, output)
+        seqLen = int(round(self.calculate_sequence(distance)))  # int(round(self.Length_pred.think(np.array([distance]))[0]))
+        samp = self.sample(input, output, seqLen)
+        rdistance = self.calculate_distance(output, samp[len(samp)-1])
+        return rdistance
 
     @staticmethod
     def calculate_distance(starting_point, end_point):
@@ -443,10 +450,10 @@ class LSTM:
 
 a = LSTM(5, 100, 2, 'lol2')
 sx = 0.1
-sy = 0.4
+sy = 0.9
 
-ex = 0.18
-ey = 0.2
+ex = 0.28
+ey = 0.18
 
 if __name__ == '__main__':
 
@@ -459,10 +466,36 @@ if __name__ == '__main__':
     a.max_seq = 240
     a.min_seq = 3
     a.import_weights(a.main_dir)
-    starting_point = np.array([float(sx), float(sy)])#    starting_point = np.array([float(sys.argv[1]), float(sys.argv[2])])#
+    coordinates = []
+    distances = []
+    '''
+    for x1 in np.arange(0.05, 1, 0.05):
+        for y1 in np.arange(0.05, 1, 0.05):
+            if len(distances) > 1:
+                val = max(distances)
+                index = distances.index(val)
+                print(val)
+                print(coordinates[index])
+            for x2 in np.arange(0.05, 1, 0.05):
+                for y2 in np.arange(0.05, 1, 0.05):
+                    starting_point = np.array([float(x1), float(y1)])  # starting_point = np.array([float(sys.argv[1]), float(sys.argv[2])])#
+                    end_point = np.array([float(x2), float(y2)])  # np.array([0.131, 0.45])
+                    dist = a.test_stuff(starting_point, end_point)
+                    distances.append(dist)
+                    coordinates.append(np.array([x1, y1, x2, y2]))
+    val = max(distances)
+    index = distances.index(val)
+    print(val)
+    print(coordinates[index])
+    '''
 
-    end_point = np.array([float(ex), float(ey)]) #np.array([0.131, 0.45]) #
+
+    starting_point = np.array([float(sys.argv[1]), float(sys.argv[2])])#    starting_point = np.array([float(sys.argv[1]), float(sys.argv[2])])#
+    end_point = np.array([float(sys.argv[3]), float(sys.argv[4])]) #np.array([0.131, 0.45]) #
     a.print_to_file(starting_point, end_point)
 
+    '''
+    a.print_to_file(starting_point, end_point)
     asdasd = 245235
     #print(a.sample(starting_point, end_point, a.calculate_distance(starting_point, end_point)))
+    '''
